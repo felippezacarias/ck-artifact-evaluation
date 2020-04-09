@@ -40,22 +40,22 @@
 {\small
 \begin{itemize}
   \item {\bf Algorithm: Slowdown Based Method to predict performance degradation from contention in remote memory access}
-  \item {\bf Program: Stream Benchmark.}
+  \item {\bf Program: Stream Benchmark}
   \item {\bf Compilation: GCC, Intel compiler, Intel MPI}
   %\item {\bf Transformations: }
-  \item {\bf Binary: Synthetic stream benchmark with different read and write ratio for the interference test. It is necessary Intel MPI version 2016.3.067 or higher to run. }
+  \item {\bf Binary: Synthetic stream benchmark with different read and write ratio for the interference test. To run it is necessary Intel MPI version 2016.3.067 or higher }
   \item {\bf Data set: Set at compiling time }
   \item {\bf Run-time environment: SUSE Linux Enterprise Server 12 with root access or without root access using perf\_event\_paranoid set to 0 for performance counter collection }
   \item {\bf Hardware: Dual socket Intel Sandy bridge architecture with access to CAS and OFFCORE response performance counters}
   %\item {\bf Run-time state: }
   %\item {\bf Execution: }
   \item {\bf Metrics: Execution time, Bandwidth}
-  \item {\bf Output: Results in CSV files, graphs and tables}
+  \item {\bf Output: Results in CSV files and graphs}
   \item {\bf Experiments: The set of scripts provide an example of workflow to collect execution time and performance counters using native and/or interfered modes (real or synthetic)}
   \item {\bf How much disk space required (approximately)?: Less than one GB}
   \item {\bf How much time is needed to prepare workflow (approximately)?: Less than one hour }
   \item {\bf How much time is needed to complete experiments (approximately)?: The benchmark can finish in approximately 15 hours }
-  \item {\bf Publicly available?: No.}
+  \item {\bf Publicly available?: No}
   %\item {\bf Code licenses (if publicly available)?: }
   %\item {\bf Data licenses (if publicly available)?: }
   %\item {\bf Workflow framework used?: }
@@ -77,7 +77,7 @@
 
 {\em The target application is compiled using GCC compiler. For the interfering application that issues remote bandwidth pressure at the sensitivity curve step, the process uses a synthetic benchmark which is an adaptation of the Stream benchmark. It is executed using the Intel compiler and Intel MPI 2016.3.067 or higher.
 
-After executing the benchmark the final outputs are processed using R scripts. The environment to run this final step can be different from the one used during the benchmarking. In order to generate graphs and tables, it requires the following packages: readr, plyr, dplyr, ggplot2, zoo. 
+After executing the benchmark the final outputs are processed using R scripts. The environment to run this final step can be different from the one used during the benchmarking. In order to generate graphs and tables, it requires the following packages: readr, plyr, dplyr, tidyr, ggplot2, zoo. 
 }
 
 \subsubsection{Data sets}
@@ -87,33 +87,33 @@ After executing the benchmark the final outputs are processed using R scripts. T
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Installation}
 
-{\em Extract the artifact package file and enter in the created {\bf artifact/} folder. The folder {\bf sources/} contains the binaries and source code of the application that will be used in the following workflow. The script {\bf start\_benchmark.sh} executes the workflow and compile the application will be used.  }
+{\em Extract the artifact package file and enter in the created {\bf artifact/} folder. The folder {\bf sources/} contains the binaries and source code of the application that will be used in the following workflow. The script {\bf start\_benchmark.sh} executes the workflow and compiles the application will be used.  }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Experiment workflow}
 
 {\em By executing the {\bf start\_benchmark.sh} it will run the following steps: 
 \begin{itemize}
-	\item Collect the application's execution time without interference.
-	\item Collect the application's performance counter to define its contentiousness.
-	\item Execute the application in pairs to collect the application execution time in contention in order to compute its real degradation due remote memory access interference.
-	\item Collect data to build the application's sensitivity curve. The application is profiled using the synthetic stream benchmark varying the read/write ratio and the inference intensity.
-	\item Execute R scripts to use the generated files from previous steps to predict the degradation using the application contentiousness and sensitivity.
+	\item Collect the application's execution time without interference using the script {\bf native.sh}.
+	\item Collect the application's performance counter to define its contentiousness using the script {\bf perf\_script.bash}.
+	\item Execute the application in pairs to collect the application execution time in contention in order to compute its real degradation due remote memory access interference using the script {\bf degradation\_pair.sh}.
+	\item Collect data to build the application's sensitivity curve. The application is profiled using the synthetic stream benchmark varying the read/write ratio and the inference intensity using {\bf sensitivity\_benchmark.sh}.
+	\item Execute R scripts ({\bf cf\_artifact\_script.R}) to use the generated files from previous steps to predict the degradation using the application contentiousness and sensitivity.
 \end{itemize}
-After every step, another script is called to format the intermediate files and generate a final csv file. If there are enough resources, all but the last one step can be executed separately. It will decrease the time to complete the experiment.
+After every step, a complementary script is called to format the intermediate files and generate a final csv file. If there are enough resources, all but the last one step can be executed separately. It will decrease the time to complete the experiment.
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Evaluation and expected result}
 
-{\em The scripts will use the folder {\bf results/} to store the intermediate files and its sub-folders. The final formatted files will be store in the artifact home folder.
+{\em The scripts will use the folder {\bf results/} to store the intermediate files and its sub-folders. The final formatted files will be stored in the artifact home folder.
 \begin{itemize}
 \item The native execution will generate the folder {\bf native\_res/}. After formatting the results the final file will be the {\bf native\_time.csv}. For each repetition of the application it will hold the application's name and its execution time.
-\item The contentiousness step will create the folder {\bf benchmark\_profile\_apps/} and {\bf counter\_complete\_miss\_off\_uncore.csv} file as the final formatted output. For each repetition of the application it will have the application's name, the collected counter and its value.
+\item The contentiousness step will create the folder {\bf benchmark\_profile\_apps/} and the {\bf counter\_complete\_miss\_off\_uncore.csv} file as the final formatted output. For each repetition of the application it will have the application's name, the collected counter and its value.
 \item The step to extract the real execution time in contention creates the {\bf benchmark\_pairs/} folder and the formatted {\bf result\_pairs.csv} file. It contains the name of the pair and the execution time of the target application.
 \item The sensitivity step run the target application with the synthetic stream varying its read/write ratio. It will create a separated folder for each read/write ratio following the pattern {\bf benchmark\_output\_all\_apps\_xx\_read/} with {\bf xx} being the read/write ratio. The formatted result will be the {\bf curve\_final.csv} file.
 \end{itemize}
-The R scripts will generate the graphs and tables using the csv files for the prediction step.
+The R scripts will generate the graphs and tables using the previous generated csv files for the prediction step. All graphs will be plotted as {\bf pdf} files. The tables will be exported to csv files named {\bf prediction\_diff.csv} and {\bf estimated\_curve\_prediciton\_diff.csv}.  
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

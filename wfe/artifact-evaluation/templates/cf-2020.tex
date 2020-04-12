@@ -14,133 +14,238 @@
 % CC BY 4.0 license
 %
 
+% Added to vimrc -- Rajiv 
+% nmap <F12> :setlocal spell! spelllang=en_gb<CR>
+% set formatoptions=tc 
+% set fo+=a 
+% set textwidth=90
+
 \documentclass{sigplanconf}
 
 \usepackage{hyperref}
 
+\usepackage[binary-units=true]{siunitx} % To use SI Units
+
+% To get per instead of -1 % \sisetup{per-mode=symbol,per-symbol = p} 
+
+\usepackage{soul} % For strikethrouugh
+
+\newcommand{\replace}[2]{\st{#1} \textcolor{red}{#2}} % To replace
+
+\usepackage{enumitem} % for setting the leftmargin to 0
+
+
+%\everpar{\looseness -1}
+
+% Better typesetting for PDF
+\usepackage[kerning=true,spacing=true,tracking=true,activate={true,nocompatibility},protrusion=true,expansion=true]{microtype}
+\microtypecontext{spacing=nonfrench}
+
+\setlist[itemize]{noitemsep, topsep=3pt, leftmargin=*, align=left}
+\setlist[enumerate]{noitemsep, topsep=3pt, leftmargin=*, align=left}
+
 \begin{document}
-
-\special{papersize=8.5in,11in}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% When adding this appendix to your paper, 
-% please remove above part
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\appendix
-\section{Artifact Appendix}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Abstract}
-
-{\em This artifact is intended to demonstrate the process of using the Slowdown based method proposed in the paper.}
-
-\subsection{Artifact check-list (meta-information)}
-
-{\small
-\begin{itemize}
-  \item {\bf Algorithm: Slowdown Based Method to predict performance degradation from contention in remote memory access}
-  \item {\bf Program: Stream Benchmark}
-  \item {\bf Compilation: GCC, Intel compiler, Intel MPI}
-  %\item {\bf Transformations: }
-  \item {\bf Binary: Synthetic stream benchmark with different read and write ratio for the interference test. To run it is necessary Intel MPI version 2016.3.067 or higher }
-  \item {\bf Data set: Set at compiling time }
-  \item {\bf Run-time environment: SUSE Linux Enterprise Server 12 with root access or without root access using perf\_event\_paranoid set to 0 for performance counter collection }
-  \item {\bf Hardware: Dual socket Intel Sandy bridge architecture with access to CAS and OFFCORE response performance counters}
-  %\item {\bf Run-time state: }
-  %\item {\bf Execution: }
-  \item {\bf Metrics: Execution time, Bandwidth}
-  \item {\bf Output: Results in CSV files and graphs}
-  \item {\bf Experiments: The set of scripts provide an example of workflow to collect execution time and performance counters using native and/or interfered modes (real or synthetic)}
-  \item {\bf How much disk space required (approximately)?: Less than one GB}
-  \item {\bf How much time is needed to prepare workflow (approximately)?: Less than one hour }
-  \item {\bf How much time is needed to complete experiments (approximately)?: The benchmark can finish in approximately 15 hours }
-  \item {\bf Publicly available?: No}
-  %\item {\bf Code licenses (if publicly available)?: }
-  %\item {\bf Data licenses (if publicly available)?: }
-  %\item {\bf Workflow framework used?: }
-  %\item {\bf Archived (provide DOI)?: }
-\end{itemize}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Description}
-
-\subsubsection{How delivered}
-
-{\em The artifact package can be download through {\bf the link}. It includes all scripts to set up a small example for execution. An application is compiled and exemplify the methodology applied in the paper. }
-
-\subsubsection{Hardware dependencies}
-
-{\em It is necessary a dual socket machine with Intel Sandy bridge processors and at least 32GB of memory to emulate the interference in disaggregated remote memory access. It is also necessary the presence of CAS and OFFCORE response performance counters to be used as the applications' contentiousness metric. }
-
-\subsubsection{Software dependencies}
-
-{\em The target application is compiled using GCC compiler. For the interfering application that issues remote bandwidth pressure at the sensitivity curve step, the process uses a synthetic benchmark which is an adaptation of the Stream benchmark. It is executed using the Intel compiler and Intel MPI 2016.3.067 or higher.
-
-After executing the benchmark the final outputs are processed using R scripts. The environment to run this final step can be different from the one used during the benchmarking. In order to generate graphs and tables, it requires the following packages: readr, plyr, dplyr, tidyr, ggplot2, zoo. 
-}
-
-\subsubsection{Data sets}
-
-{\em The dataset for the application is defined at compile time.}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Installation}
-
-{\em Extract the artifact package file and enter in the created {\bf artifact/} folder. The folder {\bf sources/} contains the binaries and source code of the application that will be used in the following workflow. The script {\bf start\_benchmark.sh} executes the workflow and compiles the application will be used.  }
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Experiment workflow}
-
-{\em By executing the {\bf start\_benchmark.sh} it will run the following steps: 
-\begin{itemize}
-	\item Collect the application's execution time without interference using the script {\bf native.sh}.
-	\item Collect the application's performance counter to define its contentiousness using the script {\bf perf\_script.bash}.
-	\item Execute the application in pairs to collect the application execution time in contention in order to compute its real degradation due remote memory access interference using the script {\bf degradation\_pair.sh}.
-	\item Collect data to build the application's sensitivity curve. The application is profiled using the synthetic stream benchmark varying the read/write ratio and the inference intensity using {\bf sensitivity\_benchmark.sh}.
-	\item Execute R scripts ({\bf cf\_artifact\_script.R}) to use the generated files from previous steps to predict the degradation using the application contentiousness and sensitivity.
-\end{itemize}
-After every step, a complementary script is called to format the intermediate files and generate a final csv file. If there are enough resources, all but the last one step can be executed separately. It will decrease the time to complete the experiment.
-}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Evaluation and expected result}
-
-{\em The scripts will use the folder {\bf results/} to store the intermediate files and its sub-folders. The final formatted files will be stored in the artifact home folder.
-\begin{itemize}
-\item The native execution will generate the folder {\bf native\_res/}. After formatting the results the final file will be the {\bf native\_time.csv}. For each repetition of the application it will hold the application's name and its execution time.
-\item The contentiousness step will create the folder {\bf benchmark\_profile\_apps/} and the {\bf counter\_complete\_miss\_off\_uncore.csv} file as the final formatted output. For each repetition of the application it will have the application's name, the collected counter and its value.
-\item The step to extract the real execution time in contention creates the {\bf benchmark\_pairs/} folder and the formatted {\bf result\_pairs.csv} file. It contains the name of the pair and the execution time of the target application.
-\item The sensitivity step run the target application with the synthetic stream varying its read/write ratio. It will create a separated folder for each read/write ratio following the pattern {\bf benchmark\_output\_all\_apps\_xx\_read/} with {\bf xx} being the read/write ratio. The formatted result will be the {\bf curve\_final.csv} file.
-\end{itemize}
-The R scripts will generate the graphs and tables using the previous generated csv files for the prediction step. All graphs will be plotted as {\bf pdf} files. The tables will be exported to csv files named {\bf prediction\_diff.csv} and {\bf estimated\_curve\_prediciton\_diff.csv}.  
-}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Experiment customization}
-
-{\em All scripts can be customized to increase the number of iterations, as well as adding new benchmarks. The places are signalized in the scripts.
-}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Notes}
-
-{\em }
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Methodology}
-
-%Submission, reviewing and badging methodology:
-
-%\begin{itemize}
-%  \item \url{http://cTuning.org/ae/submission-20190109.html}
-%  \item \url{http://cTuning.org/ae/reviewing-20190109.html}
-%  \item \url{https://www.acm.org/publications/policies/artifact-review-badging}
-%\end{itemize}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% When adding this appendix to your paper, 
-% please remove below part
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+	
+	\special{papersize=8.5in,11in}
+	
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	% When adding this appendix to your paper, 
+	% please remove above part
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	
+	\appendix
+	\section{Artifact Appendix}
+	
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	\subsection{Abstract}
+	
+	This artifact is intended to demonstrate the process of using the Slowdown based
+	method proposed in the paper.
+	
+	\subsection{Artifact check-list (meta-information)}
+	
+	\begin{itemize} 
+		
+		\item Algorithm: Slowdown Based Method to predict performance degradation from
+		contention in remote memory access
+		
+		\item Program: Stream Benchmark
+		
+		\item Compilation: GCC, Intel compiler, Intel MPI 
+		
+		\item Binary: Synthetic stream benchmark with different read and write ratio for the
+		interference test. To run it is necessary Intel MPI version 2016.3.067 or higher 
+		
+		\item Data set: Set at compiling time 
+		
+		\item Run-time environment: Any Linux distribution with Linux performance monitoring
+		tool \textsf{Perf} installed. To collect certain counters either root access is
+		required or set \textsf{perf\_event\_paranoid} to 0. Additionally, all processing
+		scripts require the R environment.  
+		
+		\item Hardware: Dual socket Intel Sandy Bridge architecture 16 cores and
+		\SI{32}{\giga\byte} memory RAM with access to CAS and OFFCORE response performance
+		counters for benchmarking
+		
+		\item Metrics: Execution time in \SI{}{\second}, Bandwidth
+		\SI{}{\giga\byte\per\second}
+		
+		\item Output: Results in CSV files and graphs 
+		
+		\item Experiments: The scripts provide an example of workflow to collect execution
+		time and performance counters using native and/or interfered modes (real or
+		synthetic). R scripts process the output data and create the final results 
+		
+		\item How much disk space required?: $\sim$\SI{1}{\giga\byte} 
+		
+		\item How much time is needed to prepare workflow?: $\sim$\SI{1}{\hour}
+		
+		\item How much time is needed to complete experiments?: The benchmark can finish in
+		$\sim$\SI{10}{\hour}
+		
+		\item Publicly available?: Yes
+		
+		\item Archived (provide DOI)?: 10.5281/zenodo.3749249
+		
+	\end{itemize}
+	
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	\subsection{Description}
+	
+	\subsubsection{How delivered} 
+	
+	The artifact package can be download through \href{https://zenodo.org/record/3749250/files/artifact.tar.gz?download=1}{the link}. It includes all
+	scripts to set up a small example for execution. An application is compiled to exemplify
+	the methodology applied in the paper. 
+	
+	\subsubsection{Hardware dependencies} 
+	
+	It is necessary to use a dual socket machine with Intel Sandy Bridge processors with at
+	least \SI{32}{\giga\byte} of memory to emulate the interference in disaggregated remote
+	memory access. It requires the presence of CAS and OFFCORE response performance
+	counters to be used as the applications' contentiousness metric.  
+	
+	\subsubsection{Software dependencies} 
+	
+	The target application is compiled using GCC compiler. For the interfering application
+	that issues remote bandwidth pressure at the sensitivity curve step, the process uses a
+	synthetic benchmark which is an adaptation of the Stream benchmark. It is executed using
+	the Intel compiler and Intel MPI 2016.3.067 or higher. After executing the benchmark, the final outputs are processed using R scripts. The
+	environment to run this final step can be different from the one used during the
+	benchmarking because it does not require too much processing power. In order to generate
+	graphs and tables, it requires R software environment with the following packages: readr,
+	plyr, dplyr, tidyr, ggplot2, zoo. 
+	
+	
+	\subsubsection{Data sets}
+	
+	The dataset for the application is defined at compile time.
+	
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	\subsection{Installation} 
+	
+	Extract the artifact package file and enter in the created \textsf{artifact/} folder.  The
+	folder \textsf{sources/} contains the binaries and source code of the application that
+	will be used in the following workflow. The script \textsf{start\_benchmark.sh} executes
+	the workflow and compiles the application will be used. The \textsf{run\_r\_scripts.sh}
+	executes the R scripts. The folder \textsf{paper\_files} contains the files and scripts to
+	reproduce the tables and graphs used in the paper. This step can be executed separated
+	from the workflow.
+	
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	\subsection{Experiment workflow} 
+	
+	By executing the \textsf{start\_benchmark.sh} it will run the following steps: 
+	
+	\begin{itemize} 
+		
+		\item Compile the target application
+		
+		\item Collect the application's execution time without interference using the script
+		\textsf{native.sh}
+		
+		\item Collect the application's performance counter to define its contentiousness
+		using the script \textsf{perf\_script.bash}
+		
+		\item Execute the application in pairs to collect the application execution time in
+		contention in order to compute its real degradation due remote memory access
+		interference using the script \textsf{degradation\_pair.sh}
+		
+		\item Collect data to build the application's sensitivity curve. It is carried out
+		executing \textsf{sensitivity\_benchmark.sh} script. The application is profiled
+		using the binaries of the interfering stream -- sent within the artifact
+		-- by varying the read/write ratio and the inference intensity
+		
+	\end{itemize} 
+	
+	After every step, a complementary script is called to format the intermediate files and
+	generate a final csv file. If there are enough resources, all steps can be executed
+	separately. It will decrease the time to complete the experiment. For the last step,
+	execute the R scripts through (\textsf{run\_r\_scripts.sh}) which will use the generated
+	files from previous steps to generate the final output.
+	
+	To reproduce the outputs from the paper, execute \textsf{run\_r\_scripts.sh}, located in
+	\textsf{paper\_files} folder. The process can take less than \SI{30}{\minute}. 
+	
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	\subsection{Evaluation and expected result} 
+	
+	The scripts will create sub-folders to store files in \textsf{results/} folder. The final formatted files will be stored in the artifact home folder.
+	
+	\begin{itemize}
+		
+		\item The native execution will generate the folder \textsf{native\_res/}. The final file will be the \textsf{native\_time.csv}, holding the application's name and its execution time for each execution
+		
+		\item The contentiousness step will create the folder
+		\textsf{benchmark\_profile\_apps/} and the
+		\textsf{counter\_complete\_miss\_off\_uncore.csv} file holding the application's
+		name, collected counter and its value
+		
+		\item The step to extract the real execution time in contention creates the
+		\textsf{benchmark\_pairs/} folder and the \textsf{result\_pairs.csv}
+		file. It holds the pair and execution time of the target
+		application
+		
+		\item The sensitivity step run the target application with the synthetic stream
+		varying its read/write ratio. It will create a separated folder for each
+		read/write ratio following the pattern
+		\textsf{benchmark\_output\_all\_apps\_xx\_read/} with \textsf{xx} being the
+		read/write ratio. The formatted result will be the \textsf{curve\_final.csv} file
+		
+	\end{itemize} 
+	
+	The R scripts will generate graphs similar to the ones presented in the paper, and tables
+	using the previous generated csv files for the prediction step. Tables will be exported to csv files named
+	\textsf{prediction\_diff.csv} and \textsf{estimated\_curve\_prediciton\_diff.csv}.  Note
+	that this artifact is intended to show the process of predicting degradation using the
+	concepts of sensitiveness and contentiousness
+	
+	
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	\subsection{Experiment customization} 
+	
+	All scripts can be customized to increase the number of iterations, as well as adding new
+	benchmarks. The places are signalized in the scripts.
+	
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	
+	%\subsection{Notes}
+	
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	
+	%\subsection{Methodology}
+	
+	%Submission, reviewing and badging methodology:
+	
+	%\begin{itemize}
+	%  \item \url{http://cTuning.org/ae/submission-20190109.html}
+	%  \item \url{http://cTuning.org/ae/reviewing-20190109.html}
+	%  \item \url{https://www.acm.org/publications/policies/artifact-review-badging}
+	%\end{itemize}
+	
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	% When adding this appendix to your paper, 
+	% please remove below part
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	
 \end{document}

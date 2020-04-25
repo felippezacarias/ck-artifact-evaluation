@@ -71,17 +71,17 @@
 		
 		\item Program: Stream Benchmark
 		
-		\item Compilation: GCC, Intel compiler, Intel MPI 
+		\item Compilation: GCC compiler and Intel MPI 
 		
 		\item Binary: Synthetic stream benchmark with different read and write ratio for the
-		interference test. To run it is necessary Intel MPI version 2016.3.067 or higher 
+		interference test. To run it is necessary Intel MPI version 2016.3.067 
 		
 		\item Data set: Set at compiling time 
 		
 		\item Run-time environment: Any Linux distribution with Linux performance monitoring
-		tool \textsf{Perf} installed. The Intel version must have the \textsf{libmpigf.so} and \textsf{libmpi.so} libraries. To collect certain counters either root access is
+		tool \textsf{Perf} and \textsf{Numactl} installed. The Intel MPI version must have the \textsf{libmpigf.so} and \textsf{libmpi.so} libraries. To collect certain counters either root access is
 		required or set \textsf{perf\_event\_paranoid} to 0. Additionally, all processing
-		scripts require the R environment.  
+		scripts require the R environment  
 		
 		\item Hardware: Dual socket Intel Sandy Bridge architecture 16 cores and
 		\SI{32}{\giga\byte} memory RAM with access to CAS and OFFCORE response performance
@@ -130,7 +130,7 @@
 	The target application is compiled using GCC compiler. For the interfering application
 	that issues remote bandwidth pressure at the sensitivity curve step, the process uses a
 	synthetic benchmark which is an adaptation of the Stream benchmark. It is executed using
-	the Intel compiler and Intel MPI 2016.3.067 or higher. After executing the benchmark, the final outputs are processed using R scripts. The
+	the Intel MPI. After executing the benchmark, the final outputs are processed using R scripts. The
 	environment to run this final step can be different from the one used during the
 	benchmarking because it does not require too much processing power. In order to generate
 	graphs and tables, it requires R software environment with the following packages: readr,
@@ -173,14 +173,14 @@
 		
 		\item Collect data to build the application's sensitivity curve. It is carried out
 		executing \textsf{sensitivity\_benchmark.sh} script. The application is profiled
-		using the binaries of the interfering stream -- sent within the artifact
+		using the interfering stream -- sent within the artifact
 		-- by varying the read/write ratio and the inference intensity
 		
 	\end{itemize} 
 	
 	After every step, a complementary script is called to format the intermediate files and
 	generate a final csv file. If there are enough resources, all steps can be executed
-	separately. It will decrease the time to complete the experiment. For the last step,
+	separately. Check inconsistencies on the output files with the \textsf{verify\_files.sh} script. For the last step,
 	execute the R scripts through (\textsf{run\_r\_scripts.sh}) which will use the generated
 	files from previous steps to generate the final output.
 	
